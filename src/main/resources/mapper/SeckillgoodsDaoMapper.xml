@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springbootmybatis.dao.SeckillgoodsDao">
+
+    <insert id="insert" parameterType="Seckillgoods">
+        insert into seckillgoods(id,price,happybean,stock,goodname,startdate,enddate)
+        value(#{id},#{price},#{happybean},#{stock},#{goodName},#{startDate},#{endDate});
+    </insert>
+
+    <update id="update" parameterType="int">
+        update seckillgoods
+        set stock=stock-1
+        where id=#{id};
+    </update>
+
+    <delete id="delete" parameterType="int">
+        delete from seckillgoods
+        where id=#{id};
+    </delete>
+
+
+
+</mapper>
