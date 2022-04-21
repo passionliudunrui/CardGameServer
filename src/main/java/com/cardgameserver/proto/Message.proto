@@ -1,0 +1,11 @@
+syntax="proto3";    //协议版本
+option java_outer_classname="MessagePOJO";
+
+message Message{
+
+  int32 id1=1;
+  int32 id2=2;
+  int32 id3=3;
+  string context=4;
+
+}

@@ -42,3 +42,5 @@ mybatis:
   #    mapper-locations: classpath:mapper/*.xml
   mapper-locations: classpath*:/mapper/*.xml
   type-aliases-package: com.cardgameserver.entity
+server:
+  port: 8890
