@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.springbootmybatis.dao.OrderDao">
+<mapper namespace="com.cardgameserver.dao.OrderDao">
 
     <insert id="insert" parameterType="Order">
         insert into t_order(id,userid)

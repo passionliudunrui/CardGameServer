@@ -39,9 +39,10 @@ public class MyServerInitializer extends ChannelInitializer<SocketChannel> {
 
         pipeline.addLast(new IdleStateHandler(10,0,0, TimeUnit.SECONDS));
         //pipeline.addLast(new HeartBeatHandler());
-        pipeline.addLast(new MyServerHandler());
+        pipeline.addLast(new MyServerHandlerInfo());
+        pipeline.addLast(new MyServerHandlerPlay());
 
-        System.out.println("绑定处理器");
+        //System.out.println("绑定处理器");
 
         //pipeline.addLast(new MyServerIdleHandler());
     }

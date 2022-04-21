@@ -22,15 +22,26 @@
 
 (四)协议的制定
     使用ProtoBuf来作为协议
-    登录        1
-    注册        2
-    加入游戏     3
-    开始游戏     4
-    查询游戏记录  5
-    查询排行榜    6
-    抢购欢乐豆    7
+    id1   表明  登录注册等哪个功能模块的编号
+    id2   表明  每个模块的信息
+    id3   备用
+    context   发送的消息String
+    注册         1   -----handlerInfo   1  1 注册成功   1  2注册失败
+    登录         2   -----handlerInfo   2  1 登录成功   2  2登陆失败
+    查询游戏信息   3   -----handlerInfo
+    查询排行榜    4   -----handlerInfo
+    加入游戏     5    -----handlerPlay
+    开始游戏     6    -----handlerPlay
+    退出游戏     7    -----handlerPlay
+    抢购欢乐豆   8    -----handlerBuy
     异常情况      0
 
-    
+
+
+
+(五)实现细节
+    总体：
+    1.使用fireChannelRead(msg) 可以使得msg在handler中继续传递
+
     
   
