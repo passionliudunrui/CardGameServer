@@ -16,6 +16,12 @@
         where id=#{id};
     </update>
 
+    <select id="selectById" parameterType="long" resultType="Account">
+        select *
+        from account
+        where id=#{id};
+    </select>
+
 
 
 </mapper>

@@ -68,9 +68,12 @@ public class UserServiceImpl implements UserService {
     public User check(Long id, String password) {
         ValueOperations valueOperations=redisTemplate.opsForValue();
         User user1 = (User) valueOperations.get(USER_INFO+id);
+        System.out.println(null==user1);
 
+        System.out.println("---------------------------------");
 
         if(user1!=null){
+
             if(password.equals(user1.getPassword())){
                 return user1;
             }
@@ -78,20 +81,25 @@ public class UserServiceImpl implements UserService {
                 return null;
             }
         }
+
         User user=userDao.findById(id);
+
         //不管有没有全部加入到redis缓存中
         valueOperations.set(USER_INFO+id,user);
+
+
         if(user!=null){
-            if(password.equals(user1.getPassword())){
+
+
+            if(password.equals(user.getPassword())){
                 return user;
             }
             else{
                 return null;
             }
-
         }
-        else{
 
+        else{
             return null;
         }
 
@@ -99,9 +107,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int insert(User user) {
-        System.out.println("2222222222222222222222222222");
+
         User user1=userDao.findById(user.getId());
-        System.out.println("1111111111111111111111111111");
+
         if(user1!=null){
             return 0;
         }

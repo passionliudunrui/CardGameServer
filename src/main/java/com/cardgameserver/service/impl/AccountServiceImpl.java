@@ -16,7 +16,7 @@ public class AccountServiceImpl implements AccountService {
     AccountDao accountDao;
 
     @Override
-    public int insert(Integer id) {
+    public int insert(Long id) {
         int insert = accountDao.insert(id);
         return insert;
     }
@@ -25,5 +25,11 @@ public class AccountServiceImpl implements AccountService {
     public int update(Account account) {
         int update = accountDao.update(account);
         return update;
+    }
+
+    @Override
+    public Account findById(Long id) {
+        Account account = accountDao.selectById(id);
+        return account;
     }
 }

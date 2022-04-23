@@ -21,10 +21,10 @@ public class MD5Util {
 
     public static String inputPassToFromPass(String inputPass){
         String newStr="";
-        String s1 = Integer.toHexString(new Random().nextInt(16));
-        String s2 = Integer.toHexString(new Random().nextInt(16));
-        String s3 = Integer.toHexString(new Random().nextInt(16));
-        String s4 = Integer.toHexString(new Random().nextInt(16));
+        String s1 = "a";
+        String s2 = "z";
+        String s3 = "b";
+        String s4 = "y";
         System.out.println(s1+"  "+s2+"  "+s3+"  "+s4);
         newStr+=s1;
         newStr+=s2;
