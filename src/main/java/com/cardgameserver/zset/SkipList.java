@@ -90,7 +90,6 @@ public class SkipList {
         //再获取写锁
         try{
             writeLock.lockInterruptibly();
-            Thread.sleep(5000);
             q.right=curr.right;
             q.left=curr;
             curr.right.left=q;
@@ -265,9 +264,10 @@ public class SkipList {
      * @return
      */
     public Map<Double,Long> dumpTenDesc(){
+        Map<Double,Long>ans=new ConcurrentHashMap<>();
         try{
             readLock.lockInterruptibly();
-            Map<Double,Long>ans=new ConcurrentHashMap<>();
+
             Node newNode=tail;
             while(newNode.down!=null){
                 newNode=newNode.down;
@@ -279,15 +279,12 @@ public class SkipList {
                 newNode=newNode.left;
                 i--;
             }
-            return ans;
-
         }catch (Exception e){
             e.printStackTrace();
         }finally {
-            writeLock.unlock();
+            readLock.unlock();
         }
-
-        return null;
+        return ans;
 
     }
 

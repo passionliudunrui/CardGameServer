@@ -1,28 +1,118 @@
 package com.cardgameserver.netty;
 
 import com.cardgameserver.proto.MessagePOJO;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.SimpleChannelInboundHandler;
+import com.cardgameserver.utils.Transfrom;
+import com.cardgameserver.vo.UserVo;
+import io.netty.channel.*;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO.Message> {
 
-//    @Override
-//    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-//        System.out.println("接收消息");
-//        MessagePOJO.Message message=(MessagePOJO.Message)msg;
-//
-//        System.out.println(message.getContext());
-//
-//        System.out.println("接收消息2");
-//    }
+    private  UserVo userVo;
+    private ChannelHandlerContext ctx;
+
+
+    public void initUserVo(UserVo userVo){
+        this.userVo=userVo;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MessagePOJO.Message message) throws Exception {
-        System.out.println(message.getContext());
+        this.ctx=ctx;
+        int id1=message.getId1();
+        int id2=message.getId2();
+        String context=message.getContext();
 
-        System.out.println("接收消息2");
+        if(id1==5||id1==6||id1==7){
 
+            switch(id1){
+                case 5:
+                    log.info("用户请求加入游戏");
+                    joinGame();
+                    break;
+
+                case 6:
+                    log.info("用户正在出牌");
+
+                    playGame(id2,context);
+                    break;
+
+
+                case 7:
+                    log.info("用户退出游戏");
+
+                    break;
+
+            }
+
+        }
+        else{
+            ctx.fireChannelRead(message);
+        }
 
     }
+
+    /**
+     *  功能描述 ：双方打牌的业务在这里实现   6
+     * @param id2   id2=0 表示当前用户不要    id=1 表示用户出牌   context表示用户出的牌
+     * @param context
+     */
+    private void playGame(int id2, String context) {
+
+        Channel channel=MyServer.players.get(userVo.getOpponent());
+
+        if(id2==0){
+            String str="对方不要，请你继续出牌";
+            MessagePOJO.Message message1 = Transfrom.transform(6, 0,4, str);
+            channel.writeAndFlush(message1);
+
+        }
+        //id2= 1
+        else{
+            boolean remove = userVo.getPokers().remove(context);
+            String str="";
+            str="对方出的牌是 "+context;  //0表示对方出完牌了  1表示对方没有出完牌
+            if(!judgeProkersEmpty()){
+                MessagePOJO.Message message1 = Transfrom.transform(6, 1, str);
+                channel.writeAndFlush(message1);
+            }
+            else{
+                String str1="游戏结束 恭喜你获得游戏胜利";
+                String str2="游戏结束 对方获得游戏胜利  下局继续加油";
+
+                /*
+                数据库的操作
+                 */
+                MessagePOJO.Message message2 = Transfrom.transform(6, 2, str1);
+                MessagePOJO.Message message3 = Transfrom.transform(6, 2, str2);
+                ctx.writeAndFlush(message2);
+                channel.writeAndFlush(message3);
+            }
+
+        }
+
+    }
+
+
+    public boolean judgeProkersEmpty(){
+        if(userVo.getPokers().isEmpty()){
+            return true;
+        }
+        return false;
+
+    }
+
+    private void joinGame() {
+        boolean offer = MyServer.waitQueue.offer(userVo);
+        System.out.println("等待队列的数量  :"+MyServer.waitQueue.size());
+        MessagePOJO.Message message1;
+        if(offer==true){
+            message1=Transfrom.transform(5,1,"正在等待其他游戏玩家");
+        }else {
+            message1 = Transfrom.transform(5, 0, "匹配游戏失败");
+        }
+        ctx.writeAndFlush(message1);
+    }
+
 }
