@@ -22,6 +22,9 @@
         where id=#{id};
     </select>
 
+    <update id="transfer">
+
+    </update>
 
 
 </mapper>

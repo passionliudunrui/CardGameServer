@@ -32,4 +32,14 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountDao.selectById(id);
         return account;
     }
+
+    @Override
+    public boolean transfer(Account account1,Account account2) {
+        int update1=accountDao.update(account1);
+        int update2=accountDao.update(account2);
+        if(update1+update2==2){
+            return true;
+        }
+        return false;
+    }
 }

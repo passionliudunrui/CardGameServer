@@ -1,17 +1,29 @@
 package com.cardgameserver.netty;
 
+import com.cardgameserver.entity.Account;
 import com.cardgameserver.proto.MessagePOJO;
+import com.cardgameserver.service.AccountService;
+import com.cardgameserver.utils.SpringUtil;
 import com.cardgameserver.utils.Transfrom;
 import com.cardgameserver.vo.UserVo;
 import io.netty.channel.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+
 @Slf4j
 public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO.Message> {
 
+    private static AccountService accountService;
+
     private  UserVo userVo;
     private ChannelHandlerContext ctx;
+    private ThreadPoolExecutor pool=MyServer.pool;
 
+    static {
+        accountService= SpringUtil.getBean(AccountService.class);
+    }
 
     public void initUserVo(UserVo userVo){
         this.userVo=userVo;
@@ -82,8 +94,39 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
                 String str2="游戏结束 对方获得游戏胜利  下局继续加油";
 
                 /*
-                数据库的操作
+                数据库的操作  本用户增加100happybean  对方减少100happybean
+                内存中要修改
+                数据库也要修改
                  */
+                userVo.setHappybean(userVo.getHappybean()+10);
+                userVo.getOpponent().setHappybean(userVo.getOpponent().getHappybean()-10);
+                Account account1=new Account(userVo.getId(),userVo.getBalance(),userVo.getHappybean());
+                Account account2=new Account(userVo.getOpponent().getId(),userVo.getOpponent().getBalance(),userVo.getOpponent().getHappybean());
+
+                /**
+                 * 交给异步线程池来执行
+                 */
+                CompletableFuture<Boolean>cf=CompletableFuture.supplyAsync(()->{
+                    boolean ans = accountService.transfer(account1, account2);
+                    return ans;
+                },pool);
+                try {
+                    CompletableFuture<String>cf2=cf.thenApplyAsync((result)->{
+                        if(result==false){
+                            try {
+                                throw new Exception("插入数据库错误");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        return "";
+                    });
+                }catch (Exception e){
+                    //给用户提示  服务器异常
+                    e.printStackTrace();
+                }
+
+
                 MessagePOJO.Message message2 = Transfrom.transform(6, 2, str1);
                 MessagePOJO.Message message3 = Transfrom.transform(6, 2, str2);
                 ctx.writeAndFlush(message2);

@@ -26,4 +26,5 @@ public class NoteServiceImpl implements NoteService {
         int insert = noteDao.insert(note);
         return insert;
     }
+
 }

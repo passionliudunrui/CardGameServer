@@ -7,4 +7,5 @@ public interface AccountDao {
     int update(Account account);
     Account selectById(Long id);
 
+    int transfer(Long id1, Long id2, Integer happybean);
 }

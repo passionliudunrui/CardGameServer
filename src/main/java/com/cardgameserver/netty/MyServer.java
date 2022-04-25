@@ -1,5 +1,6 @@
 package com.cardgameserver.netty;
 
+import com.cardgameserver.thread.CustomTheadPoolExecutor;
 import com.cardgameserver.thread.ManageThread;
 import com.cardgameserver.utils.SpringUtil;
 import com.cardgameserver.vo.UserVo;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 @Service
@@ -23,12 +25,14 @@ public class MyServer {
     public static ConcurrentHashMap<UserVo, Channel>players;
     public static LinkedBlockingQueue<UserVo> waitQueue;
     public static ManageThread manageThread;
+    public static ThreadPoolExecutor pool;
 
     static {
         skipList= new SkipList();
         players=new ConcurrentHashMap<>();
         waitQueue=new LinkedBlockingQueue<>();
         manageThread=new ManageThread();
+        pool= CustomTheadPoolExecutor.getPool();
         try {
             skipList.insert(12.0,12L);
             skipList.insert(134.9,1234L);
