@@ -1,6 +1,8 @@
 package com.cardgameserver.service.impl;
 
+import com.cardgameserver.dao.AccountDao;
 import com.cardgameserver.dao.OrderDao;
+import com.cardgameserver.entity.Account;
 import com.cardgameserver.entity.Order;
 import com.cardgameserver.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,12 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderDao orderDao;
 
+    @Autowired
+    private AccountDao accountDao;
+
     @Override
     public int insert(Order order) {
+
         return orderDao.insert(order);
     }
 }

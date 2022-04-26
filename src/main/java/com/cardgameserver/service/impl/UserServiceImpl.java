@@ -79,6 +79,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+
         User user=userDao.findById(id);
 
         //不管有没有全部加入到redis缓存中
@@ -128,22 +129,15 @@ public class UserServiceImpl implements UserService {
             return 0;
         }
 
-        //3.更新redis中的数据
-        User user1=userDao.findById(user.getId());
-        valueOperations.set(USER_INFO+user.getId(),user1);
-
-        //4.延时双删  经过一定的时间后再次将redis中的数据删除
-        /*A线程更新的时候  B线程查找
-        A线程 执行了1
-        B线程 执行了2
-        B线程执行了3
-        然后 A线程执行4
-         */
+        //延时
         try{
             Thread.sleep(50);
         }catch (InterruptedException e){
             e.printStackTrace();
         }
+
+        //4.第二次删除redis中的数据
+        redisTemplate.delete(USER_INFO+ user.getId());
 
         return resultNumber;
     }

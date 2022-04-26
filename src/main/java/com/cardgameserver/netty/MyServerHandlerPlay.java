@@ -25,7 +25,7 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
         accountService= SpringUtil.getBean(AccountService.class);
     }
 
-    public void initUserVo(UserVo userVo){
+    public void setUserVo(UserVo userVo){
         this.userVo=userVo;
     }
 
@@ -46,10 +46,8 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
 
                 case 6:
                     log.info("用户正在出牌");
-
                     playGame(id2,context);
                     break;
-
 
                 case 7:
                     log.info("用户退出游戏");
@@ -60,6 +58,8 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
 
         }
         else{
+            MyServerHandlerBuy nextHandler = ctx.pipeline().get(MyServerHandlerBuy.class);
+            nextHandler.setUserVo(userVo);
             ctx.fireChannelRead(message);
         }
 

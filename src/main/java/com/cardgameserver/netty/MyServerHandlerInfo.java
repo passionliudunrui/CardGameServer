@@ -12,9 +12,12 @@ import com.cardgameserver.utils.SpringUtil;
 import com.cardgameserver.utils.Transfrom;
 import com.cardgameserver.vo.UserVo;
 import com.cardgameserver.zset.SkipList;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +31,7 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
     private UserVo userVo;
     private ChannelHandlerContext ctx;
 
+
     static {
         userService= SpringUtil.getBean(UserService.class);
         noteService=SpringUtil.getBean(NoteService.class);
@@ -39,6 +43,10 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
         userVo=new UserVo();
     }
 
+    public void setUserVo(UserVo userVo){
+        this.userVo=userVo;
+    }
+
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MessagePOJO.Message message) throws Exception {
@@ -46,7 +54,7 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
         int id1=message.getId1();
         int id2=message.getId2();
         String context=message.getContext();
-        if(id1==1||id1==2||id1==3||id1==4){
+        if(id1==1||id1==2||id1==3||id1==4||id1==10){
             switch (id1){
                 case 1:
                     log.info("客户端发来注册请求");
@@ -64,16 +72,20 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
                     log.info("客户端查看TopTen");
                     showTopTen();
                     break;
+                case 10:
+                    log.info("修改用户信息");
+                    modifyInfo(context);
+                    break;
             }
         }
         else{
-            System.out.println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
-            System.out.println(userVo);
-            System.out.println("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+            MyServerHandlerPlay nextHandler = ctx.pipeline().get(MyServerHandlerPlay.class);
+            nextHandler.setUserVo(this.userVo);
             ctx.fireChannelRead(message);
-
         }
     }
+
+
 
     /**
      * 处理注册功能
@@ -91,6 +103,7 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
         User user=new User(id,nickName,password);
         int ans = userService.insert(user);
 
+        int ans2 = accountService.insert(id);
         if(ans==1){
             log.info("成功");
             MessagePOJO.Message message1 = Transfrom.transform(1, 1, "注册成功");
@@ -109,7 +122,6 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
      */
 
     private void register(String context){
-
         String[]data=context.split(",");
         Long id=Long.valueOf(data[0]);
         String passwd=data[1];
@@ -134,8 +146,7 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
             /**
              * 测试如何实现UserVo再不同handler的传递  实现userVo的传递
              */
-            MyServerHandlerPlay last = (MyServerHandlerPlay) ctx.pipeline().last();
-            last.initUserVo(this.userVo);
+
 
             message1=Transfrom.transform(2,1,"登陆成功");
         }
@@ -144,7 +155,7 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
     }
 
     /**
-     *
+     *查看历史游戏记录
      */
     private void showNote(){
         String ans="";
@@ -168,5 +179,37 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
         MessagePOJO.Message message1 = Transfrom.transform(4, str);
         ctx.writeAndFlush(message1);
     }
+
+    /**
+     * 修改用户信息
+     *
+     * 删除redis中的缓存  更新mysql中的缓存
+     *
+     * @param context
+     */
+    private void modifyInfo(String context) {
+        //context  中  nickName  password
+        String[]data=context.split(",");
+
+        String nickName=data[0];
+        String passwd=data[1];
+        String password = MD5Util.inputPassToFromPass(passwd);
+        /*
+        更新数据库和redis的数据
+         */
+        User user1=new User(userVo.getId(),nickName,password);
+        int ans = userService.update(user1);
+
+        /*
+        更新当前项目缓存中的数据
+         */
+        userVo.setNickName(nickName);
+        userVo.setPassword(password);
+
+        MessagePOJO.Message message1 = Transfrom.transform(10, 1, "更新信息成功");
+        ctx.writeAndFlush(message1);
+
+    }
+
 
 }

@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 
 public class Order {
 
@@ -17,4 +14,63 @@ public class Order {
     private Integer happybean;
     private String goodsName;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Integer getGoodsId() {
+        return goodsId;
+    }
+
+    public void setGoodsId(Integer goodsId) {
+        this.goodsId = goodsId;
+    }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+
+    public Integer getHappybean() {
+        return happybean;
+    }
+
+    public void setHappybean(Integer happybean) {
+        this.happybean = happybean;
+    }
+
+    public String getGoodsName() {
+        return goodsName;
+    }
+
+    public void setGoodsName(String goodsName) {
+        this.goodsName = goodsName;
+    }
+
+    public Order() {
+    }
+
+    public Order(Long userId, Integer goodsId, Integer price, Integer happybean, String goodsName) {
+
+        this.userId = userId;
+        this.goodsId = goodsId;
+        this.price = price;
+        this.happybean = happybean;
+        this.goodsName = goodsName;
+    }
 }

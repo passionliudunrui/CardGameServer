@@ -9,6 +9,7 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class MyServerInitializer extends ChannelInitializer<SocketChannel> {
+
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
@@ -31,12 +33,11 @@ public class MyServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new ProtobufEncoder());
 
         pipeline.addLast(new IdleStateHandler(10,0,0, TimeUnit.SECONDS));
-        //pipeline.addLast(new HeartBeatHandler());
+
+
         pipeline.addLast(new MyServerHandlerInfo());
         pipeline.addLast(new MyServerHandlerPlay());
+        pipeline.addLast(new MyServerHandlerBuy());
 
-        //System.out.println("绑定处理器");
-
-        //pipeline.addLast(new MyServerIdleHandler());
     }
 }

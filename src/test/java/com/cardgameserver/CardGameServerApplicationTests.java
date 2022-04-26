@@ -7,6 +7,8 @@ import com.cardgameserver.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 @SpringBootTest
 class CardGameServerApplicationTests {
@@ -21,6 +23,9 @@ class CardGameServerApplicationTests {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @Test
     public void testRabbitMQ(){
         mqSender.send("hello world");
@@ -31,9 +36,10 @@ class CardGameServerApplicationTests {
 
     @Test
     public void test(){
-        User user=new User(12L,"132","21");
-        int insert = userService.insert(user);
-        System.out.println(insert);
+        Boolean delete = redisTemplate.delete("userInfo:12");
+        System.out.println(delete);
+
+
     }
 
 
