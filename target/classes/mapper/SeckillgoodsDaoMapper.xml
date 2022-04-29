@@ -4,9 +4,10 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cardgameserver.dao.SeckillgoodsDao">
 
-    <insert id="insert" parameterType="Seckillgoods">
-        insert into seckillgoods(id,price,happybean,stock,goodname,startdate,enddate)
-        value(#{id},#{price},#{happybean},#{stock},#{goodName},#{startDate},#{endDate});
+    <insert id="insert" parameterType="Seckillgoods" useGeneratedKeys="true" keyProperty="id">
+        insert into seckillgoods(price,happybean,stock,goodname,startdate,enddate)
+        value(#{price},#{happybean},#{stock},#{goodName},#{startDate},#{endDate});
+
     </insert>
 
     <update id="update" parameterType="int">

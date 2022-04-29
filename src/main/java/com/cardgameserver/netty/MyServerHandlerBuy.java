@@ -74,7 +74,6 @@ public class MyServerHandlerBuy extends SimpleChannelInboundHandler<MessagePOJO.
                 myServerHandlerPlay.setUserVo(userVo);
                 myServerHandlerInfo.setUserVo(userVo);
 
-
                 int ans1=accountService.update(account);
                 int ans = orderService.insert(order);
 
@@ -83,8 +82,6 @@ public class MyServerHandlerBuy extends SimpleChannelInboundHandler<MessagePOJO.
                 ctx.writeAndFlush(message1);
 
             }
-
-
         }
         //秒杀系统的设计
         else{
