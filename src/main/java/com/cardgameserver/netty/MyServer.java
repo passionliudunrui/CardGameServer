@@ -11,6 +11,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,10 +23,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class MyServer {
 
     public static SkipList skipList;
-    public static ConcurrentHashMap<UserVo, Channel>players;
+    public static ConcurrentHashMap<Long, Channel>players;
     public static LinkedBlockingQueue<UserVo> waitQueue;
     public static ManageThread manageThread;
     public static ThreadPoolExecutor pool;
+//    public static ConcurrentHashMap<Channel,UserVo>channelInfo;
+
+    //在redis中添加库存
+//    public static RedisTemplate redisTemplate;
 
     static {
         skipList= new SkipList();
@@ -42,6 +47,8 @@ public class MyServer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+//        redisTemplate=SpringUtil.getBean("redisTemplate",RedisTemplate.class);
+//        redisTemplate.opsForValue().set("seckillGoods:"+2,10);
     }
 
     @Autowired

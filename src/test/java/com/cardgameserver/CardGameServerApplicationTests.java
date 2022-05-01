@@ -26,22 +26,6 @@ class CardGameServerApplicationTests {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    @Test
-    public void testRabbitMQ(){
-        mqSender.send("hello world");
-
-    }
-
-
-
-    @Test
-    public void test(){
-        Boolean delete = redisTemplate.delete("userInfo:12");
-        System.out.println(delete);
-
-
-    }
-
 
 
 

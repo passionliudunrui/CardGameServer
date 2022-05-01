@@ -9,4 +9,10 @@
         value(#{userId},#{goodsId},#{price},#{happybean},#{goodsName});
     </insert>
 
+    <select id="select" resultType="com.cardgameserver.entity.Order">
+        select *
+        from t_order
+        where userid=#{userId} and goodsid=#{goodsId};
+    </select>
+
 </mapper>

@@ -72,7 +72,7 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
      */
     private void playGame(int id2, String context) {
 
-        Channel channel=MyServer.players.get(userVo.getOpponent());
+        Channel channel=MyServer.players.get(userVo.getOpponent().getId());
 
         if(id2==0){
             String str="对方不要，请你继续出牌";

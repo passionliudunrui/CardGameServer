@@ -1,6 +1,6 @@
 spring:
   rabbitmq:
-    host: 192.168.23.131
+    host: 192.168.23.133
     username: guest
     password: guest
     virtual-host: /
@@ -33,7 +33,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
 
   redis:
-    host: 192.168.23.131
+    host: 192.168.23.133
     port: 6379
     database: 0
     connect-timeout: 10000ms

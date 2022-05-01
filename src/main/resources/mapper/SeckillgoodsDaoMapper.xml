@@ -10,10 +10,11 @@
 
     </insert>
 
+<!--    使用乐观锁机制防止超卖的情况-->
     <update id="update" parameterType="int">
         update seckillgoods
         set stock=stock-1
-        where id=#{id};
+        where id=#{id} and stock>0;
     </update>
 
     <delete id="delete" parameterType="int">
@@ -21,6 +22,10 @@
         where id=#{id};
     </delete>
 
-
+    <select id="select" parameterType="int" resultType="com.cardgameserver.entity.Seckillgoods">
+        select *
+        from seckillgoods
+        where id=#{id};
+    </select>
 
 </mapper>

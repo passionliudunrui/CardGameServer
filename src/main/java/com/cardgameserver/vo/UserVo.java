@@ -23,5 +23,7 @@ public class UserVo {
     private boolean first;//标记哪个用户先出牌
 
     private UserVo opponent;//当前用户的对手
+//    private Long opponentId;
+
 
 }

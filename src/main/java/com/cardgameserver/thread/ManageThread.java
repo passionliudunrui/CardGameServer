@@ -22,8 +22,8 @@ public class ManageThread extends Thread{
             if(judge()==true){
                 UserVo use1=MyServer.waitQueue.poll();
                 UserVo use2=MyServer.waitQueue.poll();
-                Channel channel1=MyServer.players.get(use1);
-                Channel channel2=MyServer.players.get(use2);
+                Channel channel1=MyServer.players.get(use1.getId());
+                Channel channel2=MyServer.players.get(use2.getId());
 
                 load(use1,use2);
                 MessagePOJO.Message message1 = Transfrom.transform(6, 0, 0,"匹配成功加入游戏");

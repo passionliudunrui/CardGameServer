@@ -29,4 +29,11 @@ public class SeckillgoodsServiceImpl implements SeckillgoodsService {
     public int delete(Integer id) {
         return seckillgoodsDao.delete(id);
     }
+
+    @Override
+    public Seckillgoods select(Integer id) {
+        return seckillgoodsDao.select(id);
+    }
+
+
 }

@@ -7,4 +7,6 @@ public interface SeckillgoodsService {
     int update(Integer id);
     int delete(Integer id);
 
+    Seckillgoods select(Integer id);
+
 }
