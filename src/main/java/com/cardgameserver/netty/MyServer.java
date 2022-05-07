@@ -4,6 +4,7 @@ import com.cardgameserver.thread.CustomTheadPoolExecutor;
 import com.cardgameserver.thread.ManageThread;
 import com.cardgameserver.utils.SpringUtil;
 import com.cardgameserver.vo.UserVo;
+import com.cardgameserver.zset.Node;
 import com.cardgameserver.zset.SkipList;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -24,6 +25,7 @@ public class MyServer {
 
     public static SkipList skipList;
     public static ConcurrentHashMap<Long, Channel>players;
+    public static ConcurrentHashMap<Long, Node>topPlayers;
     public static LinkedBlockingQueue<UserVo> waitQueue;
     public static ManageThread manageThread;
     public static ThreadPoolExecutor pool;
@@ -35,6 +37,7 @@ public class MyServer {
     static {
         skipList= new SkipList();
         players=new ConcurrentHashMap<>();
+        topPlayers=new ConcurrentHashMap<>();
         waitQueue=new LinkedBlockingQueue<>();
         manageThread=new ManageThread();
         pool= CustomTheadPoolExecutor.getPool();

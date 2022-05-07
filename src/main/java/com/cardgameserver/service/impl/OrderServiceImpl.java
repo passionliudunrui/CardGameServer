@@ -12,6 +12,7 @@ import com.cardgameserver.netty.MyServerHandlerPlay;
 import com.cardgameserver.service.OrderService;
 import com.cardgameserver.service.SeckillgoodsService;
 import com.cardgameserver.vo.UserVo;
+import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -62,14 +63,16 @@ public class OrderServiceImpl implements OrderService {
 
         //2.生成订单插入到mysql中的订单表中
         Order order=new Order(userVo.getId(),goods.getId(),10,100,"抢购欢乐豆");
+        orderDao.insert(order);
 
-        //3.更改用户的数据  userVo的balance和happybean
-
-
-        System.out.println("test");
-        //4.订单存储到redis中
+        //3.订单存储到redis中
         redisTemplate.opsForValue().set("order:"+userVo.getId()+":"+goods.getId(),order);
-        System.out.println("test");
+
+        //4.更改用户的数据  userVo的balance和happybean  更新每个handler的userVo
+        Channel channel = MyServer.players.get(userVo.getId());
+        MyServerHandlerPlay.changeUserInfo(userVo,channel);
+        System.out.println("更改信息完成");
+
 
         return order;
 

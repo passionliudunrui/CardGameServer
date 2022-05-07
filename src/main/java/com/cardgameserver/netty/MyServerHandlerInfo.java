@@ -16,9 +16,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
-
-
 import java.util.*;
+
+/**
+ * springboot集成netty的情况下
+ * netty的Handler中 不能进行自动注册  不能@Resource和@Autowire
+ * 通过写一个工具类从容器中直接获取对象
+ */
 
 
 @Slf4j
@@ -44,12 +48,17 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
 
     public void setUserVo(UserVo userVo){
         this.userVo=userVo;
+        System.out.println(this.userVo);
     }
 
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         this.ctx=ctx;
+        /**
+         * 通道开启的时候也就意味着开始服务了 在这里将数据库中排名前20 插入到skiplist和concurrentMap中
+         */
+
         syncTime();
 
     }
@@ -94,19 +103,12 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
         }
         else{
             MyServerHandlerPlay nextHandler = ctx.pipeline().get(MyServerHandlerPlay.class);
-            //获取channel
-            Channel channel = ctx.channel();
-
             nextHandler.setUserVo(this.userVo);
             ctx.fireChannelRead(message);
         }
     }
 
-    /**
-     * 当用户购买玩欢乐豆后 刷新用户的信息
-     */
-    private void flushInfo() {
-    }
+
 
 
     /**
@@ -260,6 +262,12 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
         MessagePOJO.Message message1 = Transfrom.transform(0, text);
         ctx.writeAndFlush(message1);
 
+    }
+
+    /**
+     * 当用户购买玩欢乐豆后 刷新用户的信息
+     */
+    private void flushInfo() {
     }
 
 }

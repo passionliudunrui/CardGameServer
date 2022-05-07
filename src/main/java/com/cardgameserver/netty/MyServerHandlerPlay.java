@@ -8,9 +8,9 @@ import com.cardgameserver.utils.Transfrom;
 import com.cardgameserver.vo.UserVo;
 import io.netty.channel.*;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
+
 
 @Slf4j
 public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO.Message> {
@@ -27,6 +27,7 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
 
     public void setUserVo(UserVo userVo){
         this.userVo=userVo;
+        System.out.println(this.userVo);
     }
 
     @Override
@@ -90,8 +91,8 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
                 channel.writeAndFlush(message1);
             }
             else{
-                String str1="游戏结束 恭喜你获得游戏胜利";
-                String str2="游戏结束 对方获得游戏胜利  下局继续加油";
+                String str1="游戏结束 恭喜你获得游戏胜利  本局赢得欢乐豆 10";
+                String str2="游戏结束 对方获得游戏胜利  下局继续加油  本局输了欢乐豆 10";
 
                 /*
                 数据库的操作  本用户增加100happybean  对方减少100happybean
@@ -99,7 +100,14 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
                 数据库也要修改
                  */
                 userVo.setHappybean(userVo.getHappybean()+10);
-                userVo.getOpponent().setHappybean(userVo.getOpponent().getHappybean()-10);
+                UserVo opponent = userVo.getOpponent();
+                opponent.setHappybean(opponent.getHappybean()-10);
+
+//                对每个handler中的userVo进行更改
+                changeUserInfo(userVo,ctx.channel());
+                changeUserInfo(opponent,MyServer.players.get(opponent.getId()));
+
+
                 Account account1=new Account(userVo.getId(),userVo.getBalance(),userVo.getHappybean());
                 Account account2=new Account(userVo.getOpponent().getId(),userVo.getOpponent().getBalance(),userVo.getOpponent().getHappybean());
 
@@ -138,6 +146,10 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
     }
 
 
+    /**
+     * 判断牌是不是空了
+     * @return
+     */
     public boolean judgeProkersEmpty(){
         if(userVo.getPokers().isEmpty()){
             return true;
@@ -146,6 +158,9 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
 
     }
 
+    /**
+     * 判断是否能够开始游戏
+     */
     private void joinGame() {
         boolean offer = MyServer.waitQueue.offer(userVo);
         System.out.println("等待队列的数量  :"+MyServer.waitQueue.size());
@@ -156,6 +171,22 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
             message1 = Transfrom.transform(5, 0, "匹配游戏失败");
         }
         ctx.writeAndFlush(message1);
+    }
+
+    /**
+     * 更改所有handler中的玩家的信息
+     * @param userVo
+     * @param channel
+     */
+    public static void changeUserInfo(UserVo userVo,Channel channel){
+        MyServerHandlerInfo myServerHandlerInfo = channel.pipeline().get(MyServerHandlerInfo.class);
+        MyServerHandlerPlay myServerHandlerPlay = channel.pipeline().get(MyServerHandlerPlay.class);
+        MyServerHandlerBuy myServerHandlerBuy = channel.pipeline().get(MyServerHandlerBuy.class);
+        myServerHandlerBuy.setUserVo(userVo);
+        myServerHandlerInfo.setUserVo(userVo);
+        myServerHandlerPlay.setUserVo(userVo);
+
+
     }
 
 }

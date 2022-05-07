@@ -55,7 +55,9 @@ public class MyServerHandlerBuy extends SimpleChannelInboundHandler<MessagePOJO.
      */
     public  void setUserVo(UserVo userVo){
         this.userVo=userVo;
+        System.out.println(this.userVo);
     }
+
     static {
         orderService= SpringUtil.getBean(OrderService.class);
         accountService=SpringUtil.getBean(AccountService.class);
@@ -177,7 +179,7 @@ public class MyServerHandlerBuy extends SimpleChannelInboundHandler<MessagePOJO.
          * 查看本周的秒杀结果
          */
         else{
-            System.out.println("00000000000000000000000000000000000000");
+
             //1.先从数据库中查  暂时没有找到order的信息 因为没有插入
             Order order = orderService.select(userVo.getId(), 2);
             if(null!=order){

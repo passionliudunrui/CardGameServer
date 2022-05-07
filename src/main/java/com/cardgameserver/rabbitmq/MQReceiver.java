@@ -35,7 +35,7 @@ public class MQReceiver {
     @RabbitListener(queues = "seckillQueue")
 
     public void receive(String msg) throws Exception {
-        System.out.println("-----------------------------------11111111111111-------------------------------------------");
+
         log.info("接收用户秒杀消息"+msg);
         SeckillMessage seckillMessage = JsonUtils.objectFromJsonStr(msg, SeckillMessage.class);
         UserVo userVo=seckillMessage.getUserVo();

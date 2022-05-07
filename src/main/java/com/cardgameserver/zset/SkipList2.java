@@ -82,11 +82,6 @@ public class SkipList2 {
     public void insert(Double score, Long id) throws InterruptedException {
 
         try {
-
-
-
-
-
             writeLock.lockInterruptibly();
             Node curr = findFirst(score);
             Node q = new Node(score, id);

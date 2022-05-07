@@ -19,6 +19,7 @@ public class UserVo {
     private Integer happybean;
 
     private boolean topTen;//标记这个user是不是排名前十名  或者是在前20人中  在skipList中
+
     private ArrayList<String> pokers;
     private boolean first;//标记哪个用户先出牌
 
@@ -26,4 +27,18 @@ public class UserVo {
 //    private Long opponentId;
 
 
+    @Override
+    public String toString() {
+        return "UserVo{" +
+                "id=" + id +
+                ", nickName='" + nickName + '\'' +
+                ", password='" + password + '\'' +
+                ", balance=" + balance +
+                ", happybean=" + happybean +
+                ", topTen=" + topTen +
+                ", pokers=" + pokers +
+                ", first=" + first +
+                ", opponent=" + opponent +
+                '}';
+    }
 }
