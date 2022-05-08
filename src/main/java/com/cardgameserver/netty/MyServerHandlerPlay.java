@@ -8,6 +8,8 @@ import com.cardgameserver.service.OrderService;
 import com.cardgameserver.utils.SpringUtil;
 import com.cardgameserver.utils.Transfrom;
 import com.cardgameserver.vo.UserVo;
+import com.dtp.core.DtpRegistry;
+import com.dtp.core.thread.DtpExecutor;
 import io.netty.channel.*;
 import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.CompletableFuture;
@@ -81,15 +83,17 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
         Order order2=new Order(12L,10,10,100.0,"test");
 
         /**
-         * 交给异步线程池来执行
+         * 交给异步线程池来执行  使用动态线程池测试
          */
+        DtpExecutor dtpExecutor1= DtpRegistry.getExecutor("dtpExecutor1");
+
         CompletableFuture<Integer>cf=CompletableFuture.supplyAsync(()->{
             int insert = orderService.insert(order);
             int insert1 = orderService.insert(order1);
             int insert2 = orderService.insert(order2);
             return insert+insert1+insert2;
 
-        },pool);
+        },dtpExecutor1);
         try {
             CompletableFuture<String>cf2=cf.thenApplyAsync((result)->{
                 if(result<3){

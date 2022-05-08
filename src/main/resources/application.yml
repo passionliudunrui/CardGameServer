@@ -1,4 +1,19 @@
+
+
 spring:
+  application:
+    name: dynamic-tp-zookeeper-demo
+  # ?????zk???????
+  dynamic:
+    tp:
+      config-type: properties # zookeeper???properties??
+      zookeeper:
+        #        config-version: 1.0.0 # ?????
+        zk-connect-str: 127.0.0.1:2181 # zk???????????????
+        root-node: /configserver/userproject # ????
+        node: dynamic-tp-zookeeper-demo # ??????
+      log-path: D:\log
+
   rabbitmq:
     host: 192.168.23.133
     username: guest
@@ -24,6 +39,9 @@ spring:
         max-attempts: 3
         max-interval: 1000ms
         multiplier: 1
+    #新加入 和动态线程池相关
+
+
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -44,3 +62,13 @@ mybatis:
   type-aliases-package: com.cardgameserver.entity
 server:
   port: 8890
+
+# ??prometheus
+management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoints:
+    web:
+      exposure:
+        include: '*'

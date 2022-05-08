@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.guicedee.services:commons-lang3:1.2.1.1-jre17">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/guicedee/services/commons-lang3/1.2.1.1-jre17/commons-lang3-1.2.1.1-jre17.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/guicedee/services/commons-lang3/1.2.1.1-jre17/commons-lang3-1.2.1.1-jre17-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/guicedee/services/commons-lang3/1.2.1.1-jre17/commons-lang3-1.2.1.1-jre17-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
