@@ -25,7 +25,7 @@ public class MyServer {
 
     public static SkipList skipList;
     public static ConcurrentHashMap<Long, Channel>players;
-    public static ConcurrentHashMap<Long, Node>topPlayers;
+    public static ConcurrentHashMap<Long, Double>nowTopPlayers;
     public static LinkedBlockingQueue<UserVo> waitQueue;
     public static ManageThread manageThread;
     public static ThreadPoolExecutor pool;
@@ -37,19 +37,19 @@ public class MyServer {
     static {
         skipList= new SkipList();
         players=new ConcurrentHashMap<>();
-        topPlayers=new ConcurrentHashMap<>();
+        nowTopPlayers=new ConcurrentHashMap<>();
         waitQueue=new LinkedBlockingQueue<>();
         manageThread=new ManageThread();
         pool= CustomTheadPoolExecutor.getPool();
-        try {
-            skipList.insert(12.0,12L);
-            skipList.insert(134.9,1234L);
-            skipList.insert(12.9,1233L);
-            skipList.insert(3434.9,1823L);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            skipList.insert(12.0,12L);
+//            skipList.insert(134.9,1234L);
+//            skipList.insert(12.9,1233L);
+//            skipList.insert(3434.9,1823L);
+//
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 //        redisTemplate=SpringUtil.getBean("redisTemplate",RedisTemplate.class);
 //        redisTemplate.opsForValue().set("seckillGoods:"+2,10);
     }

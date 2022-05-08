@@ -13,10 +13,10 @@ public class Note {
     private Long id;
     private Long idme;
     private Long idops;
-    private Integer happybean;
+    private Double happybean;
     private Date date;
 
-    public Note(Long idme, Long idops, Integer happybean, Date date){
+    public Note(Long idme, Long idops, Double happybean, Date date){
         this.idme=idme;
         this.idops=idops;
         this.happybean=happybean;

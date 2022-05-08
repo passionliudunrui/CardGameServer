@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class Goods {
     private Integer id;
     private Integer price;
-    private Integer happybean;
+    private Double happybean;
     private String goodName;
 }

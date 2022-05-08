@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class Account {
     private Long id;
     private Integer balance;
-    private Integer happybean;
+    private Double happybean;
 
 }

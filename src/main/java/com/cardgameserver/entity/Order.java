@@ -11,7 +11,7 @@ public class Order {
     private Long userId;
     private Integer goodsId;
     private Integer price;
-    private Integer happybean;
+    private Double happybean;
     private String goodsName;
 
     public Integer getId() {
@@ -46,11 +46,11 @@ public class Order {
         this.price = price;
     }
 
-    public Integer getHappybean() {
+    public Double getHappybean() {
         return happybean;
     }
 
-    public void setHappybean(Integer happybean) {
+    public void setHappybean(Double happybean) {
         this.happybean = happybean;
     }
 
@@ -65,7 +65,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(Long userId, Integer goodsId, Integer price, Integer happybean, String goodsName) {
+    public Order(Long userId, Integer goodsId, Integer price, Double happybean, String goodsName) {
 
         this.userId = userId;
         this.goodsId = goodsId;

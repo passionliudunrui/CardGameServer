@@ -1,8 +1,10 @@
 package com.cardgameserver.netty;
 
 import com.cardgameserver.entity.Account;
+import com.cardgameserver.entity.Order;
 import com.cardgameserver.proto.MessagePOJO;
 import com.cardgameserver.service.AccountService;
+import com.cardgameserver.service.OrderService;
 import com.cardgameserver.utils.SpringUtil;
 import com.cardgameserver.utils.Transfrom;
 import com.cardgameserver.vo.UserVo;
@@ -16,6 +18,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO.Message> {
 
     private static AccountService accountService;
+    private static OrderService orderService;
 
     private  UserVo userVo;
     private ChannelHandlerContext ctx;
@@ -23,6 +26,7 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
 
     static {
         accountService= SpringUtil.getBean(AccountService.class);
+        orderService=SpringUtil.getBean(OrderService.class);
     }
 
     public void setUserVo(UserVo userVo){
@@ -52,7 +56,7 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
 
                 case 7:
                     log.info("用户退出游戏");
-
+                    exitGame();
                     break;
 
             }
@@ -67,13 +71,66 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
     }
 
     /**
+     * 用户请求退出本游戏    目前用来测试
+     * 模拟通过异步线程池向数据库中插入几条数据
+     * 验证是否成功
+     */
+    private void exitGame() {
+        Order order=new Order(10L,10,10,100.0,"test");
+        Order order1=new Order(11L,10,10,100.0,"test");
+        Order order2=new Order(12L,10,10,100.0,"test");
+
+        /**
+         * 交给异步线程池来执行
+         */
+        CompletableFuture<Integer>cf=CompletableFuture.supplyAsync(()->{
+            int insert = orderService.insert(order);
+            int insert1 = orderService.insert(order1);
+            int insert2 = orderService.insert(order2);
+            return insert+insert1+insert2;
+
+        },pool);
+        try {
+            CompletableFuture<String>cf2=cf.thenApplyAsync((result)->{
+                if(result<3){
+                    try {
+                        log.error("插入数据库错误 ，请重试或者联系客服");
+
+                        throw new Exception("插入数据库错误");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                else{
+                    /**
+                     * 修改内存中user的info
+                     * 修改skiplist中的值
+                     */
+                    System.out.println("三条数据插入成功");
+
+                }
+                return "";
+            });
+        }catch (Exception e){
+            //给用户提示  服务器异常
+
+            e.printStackTrace();
+        }
+
+
+
+
+    }
+
+    /**
      *  功能描述 ：双方打牌的业务在这里实现   6
      * @param id2   id2=0 表示当前用户不要    id=1 表示用户出牌   context表示用户出的牌
      * @param context
      */
     private void playGame(int id2, String context) {
-
+        System.out.println("---------------------5");
         Channel channel=MyServer.players.get(userVo.getOpponent().getId());
+        System.out.println("---------------------5");
 
         if(id2==0){
             String str="对方不要，请你继续出牌";
@@ -122,15 +179,24 @@ public class MyServerHandlerPlay extends SimpleChannelInboundHandler<MessagePOJO
                     CompletableFuture<String>cf2=cf.thenApplyAsync((result)->{
                         if(result==false){
                             try {
+                                log.error("插入数据库错误 ，系统发生重大问题");
                                 throw new Exception("插入数据库错误");
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
+                        else{
+                            /**
+                             * 修改内存中user的info
+                             * 修改skiplist中的值
+                             */
+
+                        }
                         return "";
                     });
                 }catch (Exception e){
                     //给用户提示  服务器异常
+
                     e.printStackTrace();
                 }
 

@@ -11,12 +11,14 @@ import com.cardgameserver.utils.MD5Util;
 import com.cardgameserver.utils.SpringUtil;
 import com.cardgameserver.utils.Transfrom;
 import com.cardgameserver.vo.UserVo;
+import com.cardgameserver.zset.Node;
 import com.cardgameserver.zset.SkipList;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * springboot集成netty的情况下
@@ -31,6 +33,7 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
     private static NoteService noteService;
     private static AccountService accountService;
     private static SkipList skipList;
+    public static ConcurrentHashMap<Long, Double> nowTopPlayers;
     private UserVo userVo;
     private ChannelHandlerContext ctx;
 
@@ -40,6 +43,7 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
         noteService=SpringUtil.getBean(NoteService.class);
         accountService=SpringUtil.getBean(AccountService.class);
         skipList=MyServer.skipList;
+        nowTopPlayers=MyServer.nowTopPlayers;
     }
 
     MyServerHandlerInfo(){
@@ -58,6 +62,21 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
         /**
          * 通道开启的时候也就意味着开始服务了 在这里将数据库中排名前20 插入到skiplist和concurrentMap中
          */
+        List<Account>topPlayers=accountService.selectAll();
+//        System.out.println("1111111111111");
+//        for(Account a:topPlayers){
+//            System.out.println(a.getId()+"  "+a.getHappybean());
+//        }
+//        System.out.println("1111111111111");
+//        for(Account topPlayer:topPlayers){
+//            nowTopPlayers.put(topPlayer.getId(),topPlayer.getHappybean());
+//        }
+        for(Account topPlayer:topPlayers){
+            skipList.insert(topPlayer.getHappybean(),topPlayer.getId());
+        }
+        System.out.println("插入数据完成");
+        skipList.dumpAllDesc();
+        System.out.println("---------------------------------------");
 
         syncTime();
 
@@ -192,14 +211,18 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
     }
 
     /**
-     * 查看TopTen
+     * 查看TopFive
      */
     private void showTopTen() {
-        Map<Double, Long> ans = skipList.dumpTenDesc();
+        List<Map<Double, Long>> ans = skipList.dumpFiveDesc();
         String str="";
-        for(Map.Entry<Double,Long>entry:ans.entrySet()){
-            str=str+entry.getKey().toString()+","+entry.getValue().toString()+";";
+        for(Map<Double,Long>m:ans){
+            str=str+m.toString()+",  ";
+
         }
+//        for(Map.Entry<Double,Long>entry:ans.entrySet()){
+//            str=str+entry.getKey().toString()+","+entry.getValue().toString()+";";
+//        }
         MessagePOJO.Message message1 = Transfrom.transform(4, str);
         ctx.writeAndFlush(message1);
     }

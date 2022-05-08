@@ -10,7 +10,7 @@ public class Seckillgoods {
 
     private Integer id;
     private Integer price;
-    private Integer happybean;
+    private Double happybean;
     private Integer stock;
     private Integer version;
     private String goodName;
@@ -20,7 +20,7 @@ public class Seckillgoods {
     public Seckillgoods() {
     }
 
-    public Seckillgoods(Integer price, Integer happybean, Integer stock, Integer version, String goodName, Date startDate, Date endDate) {
+    public Seckillgoods(Integer price, Double happybean, Integer stock, Integer version, String goodName, Date startDate, Date endDate) {
         this.price = price;
         this.happybean = happybean;
         this.stock = stock;
@@ -46,11 +46,11 @@ public class Seckillgoods {
         this.price = price;
     }
 
-    public Integer getHappybean() {
+    public Double getHappybean() {
         return happybean;
     }
 
-    public void setHappybean(Integer happybean) {
+    public void setHappybean(Double happybean) {
         this.happybean = happybean;
     }
 

@@ -62,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         //2.生成订单插入到mysql中的订单表中
-        Order order=new Order(userVo.getId(),goods.getId(),10,100,"抢购欢乐豆");
+        Order order=new Order(userVo.getId(),goods.getId(),10,100.0,"抢购欢乐豆");
         orderDao.insert(order);
 
         //3.订单存储到redis中
@@ -73,6 +73,18 @@ public class OrderServiceImpl implements OrderService {
         MyServerHandlerPlay.changeUserInfo(userVo,channel);
         System.out.println("更改信息完成");
 
+        /**
+         * 重新维护skiplist
+         */
+        if(MyServer.nowTopPlayers.containsKey(userVo.getId())){
+            Double score = MyServer.nowTopPlayers.get(userVo.getId());
+            MyServer.skipList.delete(score);
+        }
+        try {
+            MyServer.skipList.insert(userVo.getHappybean(),userVo.getId());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return order;
 

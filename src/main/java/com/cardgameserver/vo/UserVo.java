@@ -16,7 +16,7 @@ public class UserVo {
     private String nickName;
     private String password;
     private Integer balance;
-    private Integer happybean;
+    private Double happybean;
 
     private boolean topTen;//标记这个user是不是排名前十名  或者是在前20人中  在skipList中
 
@@ -27,18 +27,18 @@ public class UserVo {
 //    private Long opponentId;
 
 
-    @Override
-    public String toString() {
-        return "UserVo{" +
-                "id=" + id +
-                ", nickName='" + nickName + '\'' +
-                ", password='" + password + '\'' +
-                ", balance=" + balance +
-                ", happybean=" + happybean +
-                ", topTen=" + topTen +
-                ", pokers=" + pokers +
-                ", first=" + first +
-                ", opponent=" + opponent +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "UserVo{" +
+//                "id=" + id +
+//                ", nickName='" + nickName + '\'' +
+//                ", password='" + password + '\'' +
+//                ", balance=" + balance +
+//                ", happybean=" + happybean +
+//                ", topTen=" + topTen +
+//                ", pokers=" + pokers +
+//                ", first=" + first +
+//                ", opponent=" + opponent +
+//                '}';
+//    }
 }

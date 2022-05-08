@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Transactional
 @Service
 @SuppressWarnings("all")
@@ -41,5 +43,10 @@ public class AccountServiceImpl implements AccountService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<Account> selectAll() {
+        return accountDao.selectAllAccount();
     }
 }

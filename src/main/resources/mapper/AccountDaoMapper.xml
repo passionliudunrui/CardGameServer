@@ -22,6 +22,13 @@
         where id=#{id};
     </select>
 
+    <select id="selectAllAccount" resultType="Account">
+        select *
+        from account
+        order by happybean asc
+        limit 10;
+    </select>
+
     <update id="transfer">
 
     </update>

@@ -11,6 +11,8 @@ import com.cardgameserver.utils.SpringUtil;
 import com.cardgameserver.utils.Transfrom;
 import com.cardgameserver.vo.SeckillMessage;
 import com.cardgameserver.vo.UserVo;
+import com.cardgameserver.zset.SkipList;
+import com.cardgameserver.zset.SkipList2;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,7 @@ public class MyServerHandlerBuy extends SimpleChannelInboundHandler<MessagePOJO.
     private static RedisTemplate redisTemplate;
     private static RedisScript redisScript;
     private static MQSender mqSender;
+    private static SkipList skipList;
 
     private static Map<Integer,Boolean> EmptyStockMap=new HashMap<>();
 
@@ -66,6 +69,7 @@ public class MyServerHandlerBuy extends SimpleChannelInboundHandler<MessagePOJO.
         mqSender=SpringUtil.getBean(MQSender.class);
         EmptyStockMap.put(2,false);
         redisTemplate.opsForValue().set("seckillGoods:"+2,10);
+        skipList=MyServer.skipList;
 
     }
 
@@ -92,7 +96,7 @@ public class MyServerHandlerBuy extends SimpleChannelInboundHandler<MessagePOJO.
             }
             else{
                 //正常购买  1号商品  普通购买  20yuan  100happybean
-                Order order=new Order(userVo.getId(),1,20,100,"普通购买");
+                Order order=new Order(userVo.getId(),1,20,100.0,"普通购买");
                 /*
                 更新内存中的数据  更新数据库的数据
                  */
@@ -111,6 +115,15 @@ public class MyServerHandlerBuy extends SimpleChannelInboundHandler<MessagePOJO.
                 int ans = orderService.insert(order);
 
                 int orderId=order.getId();
+                /**
+                 * 加入到skiplist中
+                 */
+
+                if(MyServer.nowTopPlayers.containsKey(userVo.getId())){
+                    Double score = MyServer.nowTopPlayers.get(userVo.getId());
+                    skipList.delete(score);
+                }
+                skipList.insert(userVo.getHappybean(),userVo.getId());
                 MessagePOJO.Message message1 = Transfrom.transform(9, 1, "购买成功 100happybean已经成功到账。 订单编号 "+orderId);
                 ctx.writeAndFlush(message1);
 

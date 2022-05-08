@@ -1,5 +1,6 @@
 package com.cardgameserver.zset;
 
+import com.cardgameserver.netty.MyServer;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,8 @@ public class SkipList {
 
     private Random random;
 
+    private Double minSocre;
+
     //保证线程安全使用了reentrantwriteReadLock来解决   更优化的方案是CAS
     private static ReentrantReadWriteLock readWriteLock=new ReentrantReadWriteLock();
     private static Lock readLock=readWriteLock.readLock();
@@ -32,7 +35,7 @@ public class SkipList {
         size=0;
         head=new Node(null);
         tail=new Node(null);
-
+        minSocre=Double.MAX_VALUE;
         head.right=tail;
         tail.left=head;
         random=new Random();
@@ -72,15 +75,23 @@ public class SkipList {
         }
         //查找的时候先从第一层节点开始找
         return null;
-
     }
 
 
     public void insert(Double score,Long id) throws InterruptedException {
+        //如果目前skiplist的长度是10  并且新加入的节点<minSocre  直接返回
+        if(size>=10&&score<minSocre){
+            return;
+        }
+        //加入到put中
+        MyServer.nowTopPlayers.put(id,score);
 
         //先获取读锁
         Node curr = findFirst(score);
         Node q=new Node(score,id);
+
+        //在hashmap中添加  id和Node的映射
+
         //要保证 socre和id的值不能都相同
         //也就是当score一样的时候 id不能一样
         if(curr.score!=null&&curr.score==q.score&&curr.id!=null&&String.valueOf(curr.id).equals(String.valueOf(q.id))){
@@ -130,6 +141,11 @@ public class SkipList {
                 i++;
             }
             size++;
+            //如果size>10  那就删除最小分数的节点  最小分数的节点在head的后面
+            if(size>10){
+                delete(head.right.score);
+            }
+
 
         }catch (Exception e){
             e.printStackTrace();
@@ -178,11 +194,15 @@ public class SkipList {
 
     /**
      * 删除节点
+     * 如果还要优化的话 使用Node节点进行删除 操作几乎相同
      * @param score
      */
     public void delete(Double  score) {
+
         //先读锁
         Node temp = search(score);
+        //把hashmap中的id也删掉
+        MyServer.nowTopPlayers.remove(temp.id);
 
         try{
             writeLock.lockInterruptibly();
@@ -191,6 +211,7 @@ public class SkipList {
                 temp.right.left = temp.left;
                 temp = tail.up;
             }
+            size--;
 
         }catch (Exception e){
             e.printStackTrace();
@@ -261,10 +282,14 @@ public class SkipList {
 
     /**
      * 返回前十名的信息
+     * 因为数据库中happybean存入的是int类型 这里使用Double会造成一些不一致的情况
+     * 暂时忽略
+     * 使用一个list返回
      * @return
      */
-    public Map<Double,Long> dumpTenDesc(){
-        Map<Double,Long>ans=new ConcurrentHashMap<>();
+    public List<Map<Double,Long>> dumpTenDesc(){
+
+        ArrayList<Map<Double,Long>>list=new ArrayList<>();
         try{
             readLock.lockInterruptibly();
 
@@ -275,7 +300,9 @@ public class SkipList {
             int i=9;
             while(newNode.left.score!=null&&i>=0){
                 System.out.println("happyBean是 "+newNode.left.score+"  用户的id是 "+newNode.left.id);
+                Map<Double,Long>ans=new ConcurrentHashMap<>();
                 ans.put(newNode.left.score,newNode.left.id);
+                list.add(ans);
                 newNode=newNode.left;
                 i--;
             }
@@ -284,9 +311,52 @@ public class SkipList {
         }finally {
             readLock.unlock();
         }
-        return ans;
+        return list;
+    }
+
+
+
+    /**
+     * 返回前五名的信息  维护前十名
+     * 因为数据库中happybean存入的是int类型 这里使用Double会造成一些不一致的情况
+     * 暂时忽略
+     * 使用一个list返回
+     * @return
+     */
+    public List<Map<Double,Long>> dumpFiveDesc(){
+
+        ArrayList<Map<Double,Long>>list=new ArrayList<>();
+        try{
+            readLock.lockInterruptibly();
+
+            Node newNode=tail;
+            while(newNode.down!=null){
+                newNode=newNode.down;
+            }
+            int i=4;
+            while(newNode.left.score!=null&&i>=0){
+                System.out.println("happyBean是 "+newNode.left.score+"  用户的id是 "+newNode.left.id);
+                Map<Double,Long>ans=new ConcurrentHashMap<>();
+                ans.put(newNode.left.score,newNode.left.id);
+                list.add(ans);
+                newNode=newNode.left;
+                i--;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            readLock.unlock();
+        }
+        return list;
 
     }
+
+
+
+
+
+
+
 
 //    public static void main(String[] args) throws InterruptedException {
 //        SkipList skipList=new SkipList();
