@@ -179,3 +179,145 @@ redis缓存数据库穿透了。
 2022.5.1项目基本完成
 
 1.bug1  用户游戏完成 没有进行结算工作  内存中的数据更改  数据库的数据更改  添加历史记录中 
+
+
+
+
+
+
+
+
+
+
+
+
+(一)数据库
+    (1) 数据库表设计
+    user            id     name    password         
+    account         id     balance  happybean
+    note            idme   idops    happybean
+    goods           id     goodname   price    happybean  
+    seckillgoods    id     goodname   price    happybean stock  version   startDate  endDate
+    order           id     userid     goodsid  price   happybean  goodsname  date
+    (2) 为何如此设计
+        (2.1) 手机号是主键 password是两次加密的md5  为何name使用varchar(30) password使用char(36)    
+        从mysql的层面来看 varchar可变长度的字符串  char是定长的字符串  很显然每个用户的用户名都不同 使用varchar节省空间 但是也带来了一个弊端
+        就是当用户进行修改的时候，可能会出现长度过大造成了页分裂的问题(分裂页来存放这一行)  因为md5加盐加密后的字符串是固定的36个字符 使用char类型
+        (2.2) 有goods和seckillGoods两个表 一个没有stock和version和startDate和endDate
+        因为普通的购买欢乐豆的情况不需要库存
+        (2.3) order表中使用了 (userid,goodsid)作为唯一索引 解决用户重复下单的问题
+        (2.4) 对于happybean加了索引优化后 万行数据查询的时间减少了 ms
+
+(二)功能介绍
+    (1)用户信息的登录注册修改功能。   
+        1.使用Mysql来实现。但是每次都是要访问数据库。在高并发比较高的情况下，瓶颈在 IO 上（网络IO和磁盘IO上），并不在内存和CPU上。
+        减少数据库磁盘 IO 时间最有效的办法是使用缓存。还可以将数据库弄成 master/slave 的读写分离，分表分库等等。
+        2.MyBatis中有两个缓存，sqlSession级别的一级缓存，Mapper级别的二级缓存。默认只是开启了一级缓存。 使用了二级缓存需要手动开启。
+        3.后期学习了一些分布式的知识，意识到项目应该朝着分布式的方法去发展。但是Mybatis默认二级缓存只是本地。考虑使用mybatis整合redis实现二级缓存。
+        4.直接使用Redis作为缓存。需要考虑缓存一致性的问题。
+    (2)用户申请加入游戏,开始游戏,退出游戏功能。
+    (3)用户查询历史记录。
+    (4)实时获取欢乐豆排行榜前十名的功能。
+    (5)购买欢乐豆和抢购欢乐豆。
+        衍生的问题
+        (一)用户信息的登录注册修改
+        (一.1)关于Mybatis的问题
+            1.使用mybatis的一般步骤   
+                (1).在pom文件中添加mybatis和mysql的依赖。 
+                (2).创建接口，里面是增删查改的方法。
+                (3).创建mapper.xml文件，里面有namespace,定位哪个接口， 里面标签中有id，定位接口中的哪个方法。
+                (4).创建config.xml文件，配置mybatis相关的信息，最重要的是一个<mapper>标签。写上mapper.xml的文件位置。
+                (5).创建配置文件，然后生成SqlSessionFactory。
+                (6).通过SqlSessionFactory生成了sqlSession。(注意这里的sqlSession线程不安全)可以通过sqlSession直接查询，也可以转化成mapper接口查询。
+            2.mybatis的ORM框架的原理。
+                (1)首先是mapper.xml文件中对类路径的绑定，里面的namespace和id已经传入的参数。
+                (2)发送这些数据给mysql，mysql只能帮我们查询到数据。
+                (3)返回到Mybatis中，然后mybatis根据这些类路径，通过反射获取到这个类，然后new一个对象。
+                (4)通过绑定的关系，然后set到对象的属性中，然后返回。
+            3.mybatis的缓存问题
+                (1)一级缓存，默认开启，是sqlSession级别的缓存，本质上就是hashMap。
+                (2)二级缓存，需要配置开启，Mapper级别缓存。多个sqlSession共享。 cacheEnable 
+                (3)mybatis整合redis缓存的实现。
+                    因为二级缓存占用的是JVM的堆空间，使用redis进行实现。重写了mybatis的cache将缓存映射到redis中。
+                    (3.1)sqlSessionFactory的二级缓存是PerpetualCache实现了Cache接口。里面本质上是一个HashMap来记录。通过这个hashmap缓存查询出来的值。
+                    (3.2)在config文件中开启二级缓存 setting name=cacheEnable value=true  在.xml文件设置cache
+                    (3.3)使用redis来实现Cache接口重写几个方法。获取id(每个Dao接口都有一个唯一的id)。
+                    (3.4)使用redis的hash来实现。  hash中的id是dao接口的名字，也就是一张表的访问一个id。key其实是具体的函数。(select id select all等等 )
+                    value是这个查询的结构，存放到了redis中。  主要写putObject()  getObject()  clear()
+                    缺点：1.key比较大的时候，占用了redis的内存，在一定程度上影响了redis的性能。
+                    2.如果是使用update，导致整个的缓存失效。影响的业务很大。命中率比较低。
+                    3.多个表的情况下还有问题，可以通过其他表ref属性来解决。
+            4.mybatis如何防止sql注入的风险
+                例子  select * from table where id=or 1=1 (or一定会成功执行)
+                在前端或者后端对参数进行校验拦截。
+                mybatis中的mapper文件中，有#{}和${}两种。
+                当查询之气那，mybaits对文件进行动态解析。
+                #{}是预编译，也就是编译好了sql语句，参数只是一个占位符。
+                ${}没有预编译，当传入参数之后，生成sql语句交给mysql。
+                所以有效的防止了sql注入的风险。
+            5.sqlSession的线程不安全。 (ThreadLoacl解决方案)
+                发现问题是在于一开始开发没有注意到线程安全问题。使用了一个单例模式来构建sqlSession。
+                当两个用户游戏的时候，一个用户退出，导致另外的用户sqlSession也关闭。 查询官方文档说sqlSession线程不安全。
+                查看源码 SqlSession中执行一个查询语句的源码
+                    (1)从hashmap中查询
+                    (2)从mysql中查询
+                    (3)将mysql中的数据放到hasmap中。
+                一开始来说，比如现在有三个线程同时使用了sqlSession。第一个线程执行了select 
+                第二个线程执行了select  第三个线程执行了insert
+                第一个线程从map中找没有找到，然后从数据库中查询。查询了5条数据 这时候还没有放到map中。
+                第二个线程执行了一个insert语句完成。(时间片轮转)
+                第三个线程执行力select从mysql查找了6条数据，并且存放到mybatis中完成。
+                然后第一个线程存放到map中完成，后来的数据都是错误的。
+                解决线程安全的三种方案。(周志明老师深入了解Java虚拟机分析)同步阻塞，同步非阻塞和无同步方案。
+                因为这种同步阻塞和同步非阻塞方法涉及到对共享资源的竞争。那么导致效率急剧下降。考虑使用无同步方案。
+                也就是线程自己有一个sqlSession这样就没有线程安全问题，同时深入理解Java虚拟机作者也提到了ThreadLoacl。
+            6.如何使用ThreadLocal来解决sqlSession线程不安全
+                阅读线程类的源码可以看到有 ThreadLocalMap 这里面其实就是存储了key就是threadlocal的引用，value就是真正的值。
+                (1)创建一个 static ThreadLocal<SqlSession>threadLocalSql 的对象
+                (2)当业务种有使用sqlSession的时候那就通过提供的get() 里面 if(threadlocalSql.get()==null) 创建一个新的sqlSession，通过set方法存放到thread种。
+                从源码的角度来看，其实threadLocalMap种存放的是Entry对象继承了弱引用。但是value是强引用。调用threadlocalsql其实先获取当前线程，然后从当前线程的threadlocalMap去查询。
+                (3)当使用完的时候注意释放sqlSessioni。一开始没有考虑。压测的时候发现了内存泄露的问题。
+                    如何释放，先获取到SqlSession，然后关闭，然后threadlocalSql.remove()将value删除。
+                
+                
+                
+                
+
+
+
+
+        2.关于Redis的问题
+        
+
+    
+
+
+(三)亮点难点
+    系统层面：如何保证线程安全，如何提高项目的并发量和QPS。
+    用户层面：如何保证用户信息安全(用户密码的二次加密，MD5加盐，防止sql注入)，如何提升游戏体验(响应时间，心跳检测，半连接队列攻击)
+
+
+(四)系统架构升级
+    1.SocketBIO+多线程
+    2.SocketBIO+线程池
+    3.使用NIO(未完成)
+    4.使用Netty
+    5.使用Springboot+Netty
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
