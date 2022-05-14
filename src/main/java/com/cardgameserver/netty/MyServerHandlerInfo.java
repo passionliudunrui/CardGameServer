@@ -13,6 +13,7 @@ import com.cardgameserver.utils.Transfrom;
 import com.cardgameserver.vo.UserVo;
 import com.cardgameserver.zset.Node;
 import com.cardgameserver.zset.SkipList;
+import com.github.pagehelper.PageHelper;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -201,6 +202,12 @@ public class MyServerHandlerInfo extends SimpleChannelInboundHandler<MessagePOJO
      *查看历史游戏记录
      */
     private void showNote(){
+        /**
+         * 可以添加参数进行优化  用户查询那一页的数据
+         * 默认是查询第一页的前10条数据
+         */
+        //添加了分页插件 来实现分页的功能
+        PageHelper.startPage(0,10);
         String ans="";
         List<Note> notes = noteService.findById(userVo.getId());
         for(Note note:notes){

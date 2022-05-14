@@ -8,7 +8,8 @@
     <select id="findById" parameterType="long" resultType="Note">
         select id,idme,idops,happybean,date
         from note
-        where idme=#{userId} or idops=#{userId};
+        where idme=#{userId} or idops=#{userId}
+        order by date desc
     </select>
 
 
