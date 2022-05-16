@@ -1,7 +1,5 @@
 package com.cardgameserver.thread;
 
-import com.cardgameserver.entity.Order;
-import com.cardgameserver.entity.Seckillgoods;
 import com.cardgameserver.service.SeckillgoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
